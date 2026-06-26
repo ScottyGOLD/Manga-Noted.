@@ -10,14 +10,14 @@ class Manga extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'title', 
-        'author_id', // Pastikan kolom ini sudah didaftarkan
-        'volumes_owned', 
-        'last_read_chapter', 
-        'status', 
-        'cover_image'
-    ];
+   protected $fillable = [
+    'title', 
+    'author_id', 
+    'volumes_owned', 
+    'last_read_chapter', 
+    'target_chapter', 
+    'status', 
+    'cover_image'];
 
     // Relasi ke model Author
     public function author()

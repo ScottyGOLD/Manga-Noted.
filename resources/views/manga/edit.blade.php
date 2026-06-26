@@ -14,7 +14,6 @@
 
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Memastikan container memiliki ruang tinggi yang cukup agar gambar cropper terlihat jelas */
         .image-container {
             width: 100%;
             min-height: 320px;
@@ -83,7 +82,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Volume Dimiliki</label>
                         <input type="number" name="volumes_owned" value="{{ old('volumes_owned', $manga->volumes_owned) }}" min="0" required
@@ -93,6 +92,11 @@
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Chapter Terakhir</label>
                         <input type="number" name="last_read_chapter" value="{{ old('last_read_chapter', $manga->last_read_chapter) }}" min="0" required
                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5 text-blue-600 font-bold">Target Chapter Goal</label>
+                        <input type="number" name="target_chapter" value="{{ old('target_chapter', $manga->target_chapter ?? 0) }}" min="0" required
+                               class="w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-blue-50/20 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                     </div>
                 </div>
 
@@ -167,7 +171,6 @@ const croppedImageData = document.getElementById('cropped-image-data');
 const resultWrapper = document.getElementById('result-wrapper');
 const croppedPreview = document.getElementById('cropped-preview');
 
-// 1. Deteksi perubahan file upload gambar baru
 imageInput.addEventListener('change', function(e) {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -176,15 +179,9 @@ imageInput.addEventListener('change', function(e) {
         
         reader.onload = function(event) {
             imageToCrop.src = event.target.result;
-            
-            // Tampilkan container pemotong gambar
             cropWrapper.classList.remove('hidden');
+            if (cropper) { cropper.destroy(); }
             
-            if (cropper) {
-                cropper.destroy();
-            }
-            
-            // RASIO HORIZONTAL 16:9 MENGIKUTI STRUKTUR DESAIN BANNER CARD DASHBOARD
             cropper = new Cropper(imageToCrop, {
                 aspectRatio: 16 / 9, 
                 viewMode: 1,
@@ -197,20 +194,13 @@ imageInput.addEventListener('change', function(e) {
     }
 });
 
-// 2. Aksi kunci potongan gambar baru
 btnCrop.addEventListener('click', function() {
     if (cropper) {
-        const canvas = cropper.getCroppedCanvas({
-            width: 600, 
-            height: 338
-        });
-        
+        const canvas = cropper.getCroppedCanvas({ width: 600, height: 338 });
         const base64Image = canvas.toDataURL('image/jpeg');
         croppedImageData.value = base64Image;
-        
         croppedPreview.src = base64Image;
         resultWrapper.classList.remove('hidden');
-        
         alert('Gambar horizontal baru berhasil dipotong dan dikunci!');
     }
 });

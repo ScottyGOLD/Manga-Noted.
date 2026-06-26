@@ -57,15 +57,21 @@ class MangaController extends Controller
     // STORE: Menyimpan data manga baru ke database
     public function store(Request $request)
     {
+        // 1. Validasi data
         $request->validate([
-            'title' => 'required|max:255',
-            'status' => 'required',
+            'title' => 'required|string|max:255',
+            'volumes_owned' => 'required|integer|min:0',
+            'last_read_chapter' => 'required|integer|min:0',
+            'target_chapter' => 'required|integer|min:0', 
+            'status' => 'required|in:Backlog,Reading,Completed',
         ]);
 
+        // PERBAIKAN: Masukkan target_chapter ke dalam array $data
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
             'last_read_chapter' => $request->last_read_chapter ?? 0,
+            'target_chapter'    => $request->target_chapter ?? 0, // <--- Selesai diperbaiki
             'status'            => $request->status,
         ];
 
@@ -77,17 +83,14 @@ class MangaController extends Controller
             $data['author_id'] = $request->author_id;
         }
 
-        // LOGIKA PROSES GAMBAR YANG DI-CROP (PENTING):
+        // LOGIKA PROSES GAMBAR YANG DI-CROP:
         if ($request->filled('cropped_image')) {
             $image_parts = explode(";base64,", $request->cropped_image);
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1];
             $image_base64 = base64_decode($image_parts[1]);
             
-            // Buat nama file unik
             $fileName = 'covers/' . uniqid() . '.' . $image_type;
-            
-            // Simpan langsung ke disk public rahasia laravel
             \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
             
             $data['cover_image'] = $fileName;
@@ -97,7 +100,7 @@ class MangaController extends Controller
 
         return redirect()->route('manga.index')->with('success', 'Manga berhasil disimpan dengan cover proporsional!');
     }
-    
+        
     // EDIT: Menampilkan halaman form edit
     public function edit(Manga $manga)
     {
@@ -109,17 +112,23 @@ class MangaController extends Controller
     }
 
         // UPDATE: Memperbarui data manga
-    public function update(Request $request, Manga $manga)
+        public function update(Request $request, Manga $manga)
     {
+        // Tambahkan target_chapter di validasi update agar aman
         $request->validate([
             'title' => 'required|max:255',
+            'volumes_owned' => 'required|integer|min:0',
+            'last_read_chapter' => 'required|integer|min:0',
+            'target_chapter' => 'required|integer|min:0', // <--- Selesai diperbaiki
             'status' => 'required',
         ]);
 
+        // PERBAIKAN: Masukkan target_chapter ke dalam array $data sewaktu update
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
             'last_read_chapter' => $request->last_read_chapter ?? 0,
+            'target_chapter'    => $request->target_chapter ?? 0, // <--- Selesai diperbaiki
             'status'            => $request->status,
         ];
 
@@ -131,29 +140,22 @@ class MangaController extends Controller
             $data['author_id'] = $request->author_id;
         }
 
-        // LOGIKA PROSES PROSES UPDATE GAMBAR CROP (PENTING):
+        // LOGIKA PROSES UPDATE GAMBAR CROP:
         if ($request->filled('cropped_image')) {
-            // 1. Jika komik ini punya file cover lama, hapus dari folder storage
             if ($manga->cover_image) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($manga->cover_image);
             }
 
-            // 2. Dekode teks Base64 gambar baru menjadi file gambar mentah
             $image_parts = explode(";base64,", $request->cropped_image);
             $image_type_aux = explode("image/", $image_parts[0]);
             $image_type = $image_type_aux[1];
             $image_base64 = base64_decode($image_parts[1]);
             
-            // 3. Buat nama file cover acak yang unik
             $fileName = 'covers/' . uniqid() . '.' . $image_type;
-            
-            // 4. Masukkan file ke dalam disk public laravel
             \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
             
-            // Masukkan data nama file baru ke array update
             $data['cover_image'] = $fileName;
         } else {
-            // Jika user tidak memilih file gambar baru, tetap pertahankan nama file cover yang lama
             $data['cover_image'] = $manga->cover_image;
         }
 
@@ -175,14 +177,26 @@ class MangaController extends Controller
     }
 
     // PATCH: Menambahkan 1 ke last_read_chapter
-    public function incrementChapter(Manga $manga)
+    public function incrementChapter($id)
     {
-        // Tambahkan angka chapter lama dengan 1
-        $manga->increment('last_read_chapter');
+        $manga = Manga::findOrFail($id);
+        
+        // Tambah 1 chapter
+        $manga->last_read_chapter += 1;
 
-        // Jika ingin otomatis mengubah status ke 'Completed' saat mencapai chapter tertentu,
-        // kamu bisa tambahkan logika pengondisian di sini nanti.
+        // LOGIKA OTOMATIS: Jika target_chapter sudah diatur (> 0) 
+        // dan bab yang dibaca sudah menyamai atau melebihi target
+        if ($manga->target_chapter > 0 && $manga->last_read_chapter >= $manga->target_chapter) {
+            $manga->status = 'Completed';
+        } else {
+            // Jika awalnya Backlog lalu mulai dibaca, otomatis pindah ke Reading
+            if ($manga->status == 'Backlog') {
+                $manga->status = 'Reading';
+            }
+        }
 
-        return redirect()->route('manga.index')->with('success', "Chapter {$manga->title} berhasil dinaikkan!");
+        $manga->save();
+
+        return back()->with('success', 'Progres bacaan berhasil ditingkatkan!');
     }
 }

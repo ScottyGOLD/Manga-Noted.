@@ -15,8 +15,13 @@
         $progressBarColor = 'bg-green-500';
     }
 
-    // Hitung persentase sederhana untuk Progress Bar (asumsi jika total vol > 0)
-    $progressPercent = $manga->volumes_owned > 0 ? min(($manga->last_read_chapter / ($manga->volumes_owned * 10)) * 100, 100) : 0;
+    // LOGIKA BARU: Hitung persentase dinamis berdasarkan target_chapter
+    $progressPercent = 0;
+    if (isset($manga->target_chapter) && $manga->target_chapter > 0) {
+        $progressPercent = min(($manga->last_read_chapter / $manga->target_chapter) * 100, 100);
+    } elseif ($theme == 'completed') {
+        $progressPercent = 100;
+    }
 @endphp
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col group transition hover:shadow-md">
@@ -44,14 +49,17 @@
             
             <hr class="border-slate-100 my-2">
 
-            <div class="text-xs text-slate-500 font-medium flex items-center gap-1.5 mb-2">
-                <span>Ch. {{ $manga->last_read_chapter }}</span>
-                <span class="text-slate-300">•</span>
-                <span>{{ $manga->volumes_owned }} vol</span>
+            <div class="text-xs text-slate-500 font-medium flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                    <span>Ch. <strong class="text-slate-800">{{ $manga->last_read_chapter }}</strong> / {{ ($manga->target_chapter ?? 0) > 0 ? $manga->target_chapter : '∞' }}</span>
+                    <span class="text-slate-300">•</span>
+                    <span>{{ $manga->volumes_owned }} vol</span>
+                </div>
+                <span class="text-slate-400 text-[10px]">{{ round($progressPercent) }}%</span>
             </div>
 
-            <div class="w-full bg-slate-100 h-1 rounded-full overflow-hidden mb-4">
-                <div class="{{ $progressBarColor }} h-full" style="width: {{ $theme == 'completed' ? '100' : ($theme == 'backlog' ? '0' : '45') }}%"></div>
+            <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-4">
+                <div class="{{ $progressBarColor }} h-full rounded-full transition-all duration-500" style="width: {{ $progressPercent }}%"></div>
             </div>
         </div>
 
@@ -61,7 +69,7 @@
                 <form action="{{ route('manga.increment', $manga->id) }}" method="POST" class="flex-1">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="w-full bg-slate-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-slate-200 text-slate-600 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 transition cursor-pointer">
+                    <button type="submit" {{ $manga->status == 'Completed' ? 'disabled' : '' }} class="w-full bg-slate-50 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 border border-slate-200 text-slate-600 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1 transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                         <span class="text-sm font-bold">+</span> 1 Chapter
                     </button>
                 </form>

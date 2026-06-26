@@ -1,19 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Manga Noted</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
     <style>
         body { font-family: 'Inter', sans-serif; }
+        
+        /* Kustomisasi Navigasi Panah Swiper agar Presisi & Elegan */
+        .swiper-button-next, .swiper-button-prev {
+            color: #1e293b;
+            background: rgba(255, 255, 255, 0.95);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            top: 50%;
+            transform: translateY(-50%);
+            transition: all 0.2s ease;
+        }
+        .swiper-button-next:hover, .swiper-button-prev:hover {
+            background: #ffffff;
+            scale: 1.05;
+        }
+        .swiper-button-next::after, .swiper-button-prev::after {
+            font-size: 14px;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="bg-[#f8fafc]">
+<body class="bg-[#f8fafc] text-slate-800">
 
     <nav class="bg-[#1e293b] text-white px-8 py-4 flex justify-between items-center shadow-md relative" x-data="{ open: false }">
         <div class="flex items-center gap-2 font-semibold text-xl tracking-wide">
@@ -64,16 +91,16 @@
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-6 py-8">
+    <main class="max-w-7xl mx-auto px-6 md:px-12 py-8">
         
-        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-bold text-slate-800">Dashboard</h1>
-                <p class="text-slate-500 mt-1">Koleksi manga kamu — <span class="font-medium text-slate-700">{{ $mangas->count() }} judul total</span></p>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard</h1>
+                <p class="text-sm text-slate-500 mt-0.5">Koleksi manga kamu — <span class="font-semibold text-slate-700">{{ $mangas->count() }} judul total</span></p>
             </div>
             
-            <a href="{{ route('manga.create') }}" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-medium px-4 py-2 rounded-lg text-sm shadow-sm transition whitespace-nowrap">
-                <span class="text-base font-bold">+</span> Tambah Manga
+            <a href="{{ route('manga.create') }}" class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-semibold px-4 py-2.5 rounded-xl text-sm shadow-xs transition whitespace-nowrap cursor-pointer">
+                <span class="text-base font-bold text-slate-500">+</span> Tambah Manga
             </a>
         </div>
 
@@ -86,62 +113,98 @@
                         </svg>
                     </span>
                     <input type="text" name="search" value="{{ request('search') }}" 
-                           class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 shadow-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm transition" 
+                           class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 shadow-2xs focus:outline-none focus:border-blue-500 text-sm transition" 
                            placeholder="Cari judul manga atau nama author...">
                 </div>
                 
-                <button type="submit" class="bg-[#4475b5] hover:bg-[#366199] text-white rounded-lg px-5 py-2 text-sm font-medium shadow-sm transition cursor-pointer">
+                <button type="submit" class="bg-[#4475b5] hover:bg-[#366199] text-white rounded-xl px-5 py-2 text-sm font-medium shadow-xs transition cursor-pointer">
                     Cari
                 </button>
 
                 @if(request('search'))
-                    <a href="{{ route('manga.index') }}" class="border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-lg px-4 py-2 text-sm font-medium shadow-sm flex items-center transition">
+                    <a href="{{ route('manga.index') }}" class="border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 rounded-xl px-4 py-2 text-sm font-medium shadow-xs flex items-center transition">
                         Reset
                     </a>
                 @endif
             </form>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-            
-            <div>
-                <div class="flex items-center gap-2 mb-4 font-semibold text-slate-700">
-                    Backlog 
-                    <span class="bg-slate-200 text-slate-700 text-xs px-2.5 py-0.5 rounded-full">{{ $mangas->where('status', 'Backlog')->count() }}</span>
-                </div>
-                <div class="space-y-4">
-                    @foreach($mangas->where('status', 'Backlog') as $manga)
-                        @include('manga.card', ['manga' => $manga, 'theme' => 'backlog'])
-                    @endforeach
-                </div>
-            </div>
+        @php
+            $categories = [
+                ['slug' => 'backlog', 'label' => 'Backlog', 'badgeBg' => 'bg-slate-200 text-slate-700'],
+                ['slug' => 'reading', 'label' => 'Reading', 'badgeBg' => 'bg-blue-100 text-blue-700'],
+                ['slug' => 'completed', 'label' => 'Completed', 'badgeBg' => 'bg-green-100 text-green-700']
+            ];
+        @endphp
 
-            <div>
-                <div class="flex items-center gap-2 mb-4 font-semibold text-slate-700">
-                    Reading 
-                    <span class="bg-blue-100 text-blue-600 text-xs px-2.5 py-0.5 rounded-full">{{ $mangas->where('status', 'Reading')->count() }}</span>
-                </div>
-                <div class="space-y-4">
-                    @foreach($mangas->where('status', 'Reading') as $manga)
-                        @include('manga.card', ['manga' => $manga, 'theme' => 'reading'])
-                     @endforeach
-                </div>
-            </div>
+        @foreach($categories as $cat)
+            @php
+                $filteredManga = $mangas->where('status', ucfirst($cat['slug']));
+            @endphp
 
-            <div>
-                <div class="flex items-center gap-2 mb-4 font-semibold text-slate-700">
-                    Completed 
-                    <span class="bg-green-100 text-green-600 text-xs px-2.5 py-0.5 rounded-full">{{ $mangas->where('status', 'Completed')->count() }}</span>
+            <div class="mb-8">
+                
+                <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-1.5">
+                    <h2 class="text-xl font-800 text-slate-800 tracking-tight">{{ $cat['label'] }}</h2>
+                    <span class="text-xs font-bold px-2.5 py-0.5 rounded-full {{ $cat['badgeBg'] }}">
+                        {{ $filteredManga->count() }}
+                    </span>
                 </div>
-                <div class="space-y-4">
-                    @foreach($mangas->where('status', 'Completed') as $manga)
-                        @include('manga.card', ['manga' => $manga, 'theme' => 'completed'])
-                    @endforeach
-                </div>
-            </div>
 
-        </div>
+                @if($filteredManga->count() > 3)
+                    <div class="swiper mySwiper-{{ $cat['slug'] }} relative px-1">
+                        <div class="swiper-wrapper py-1.5">
+                            @foreach($filteredManga as $manga)
+                                <div class="swiper-slide h-auto">
+                                    @include('manga.card', ['manga' => $manga, 'theme' => $cat['slug']])
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="swiper-button-next"></div>
+                        <div class="swiper-button-prev"></div>
+                    </div>
+                @elseif($filteredManga->count() > 0)
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        @foreach($filteredManga as $manga)
+                            @include('manga.card', ['manga' => $manga, 'theme' => $cat['slug']])
+                        @endforeach
+                    </div>
+                @else
+                    <div class="text-center py-6 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs text-slate-400 font-medium">
+                        Belum ada komik di daftar {{ $cat['label'] }}.
+                    </div>
+                @endif
+            </div>
+        @endforeach
+
     </main>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sliderOptions = {
+                slidesPerView: 1,
+                spaceBetween: 24, // Pas dengan gap-6 Tailwind
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 } // Memuat pas 3 kartu sejajar di monitor besar
+                }
+            };
+
+            // Inisialisasi slider jika elemennya tersedia di DOM
+            if(document.querySelector('.mySwiper-backlog')) {
+                new Swiper('.mySwiper-backlog', sliderOptions);
+            }
+            if(document.querySelector('.mySwiper-reading')) {
+                new Swiper('.mySwiper-reading', sliderOptions);
+            }
+            if(document.querySelector('.mySwiper-completed')) {
+                new Swiper('.mySwiper-completed', sliderOptions);
+            }
+        });
+    </script>
 </body>
 </html>
