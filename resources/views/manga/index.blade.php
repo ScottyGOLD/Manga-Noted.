@@ -16,6 +16,11 @@
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
     <style>
+        /* Menambahkan efek scroll halus saat link kategori diklik */
+        html {
+            scroll-behavior: smooth;
+        }
+
         body { font-family: 'Inter', sans-serif; }
         
         /* Kustomisasi Navigasi Panah Swiper agar Presisi & Elegan */
@@ -53,8 +58,8 @@
         </div>
 
         <div class="relative">
-            <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 focus:outline-none cursor-pointer group">
-                <div class="w-10 h-10 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center overflow-hidden transition group-hover:border-white">
+            <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2.5 focus:outline-none cursor-pointer group hover:bg-slate-800/60 p-1.5 rounded-xl transition">
+                <div class="w-10 h-10 rounded-full border-2 border-slate-300 bg-white flex items-center justify-center overflow-hidden transition group-hover:border-white select-none">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
@@ -71,19 +76,49 @@
                  x-transition:leave="transition ease-in duration-75"
                  x-transition:leave-start="transform opacity-100 scale-100"
                  x-transition:leave-end="transform opacity-0 scale-95"
-                 class="absolute right-0 mt-3 w-64 bg-white rounded-lg shadow-xl py-4 px-4 z-50 border border-slate-100 text-slate-800"
+                 class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl py-3 px-3 z-50 border border-slate-100 text-slate-800"
                  style="display: none;">
                 
-                <div class="mb-3">
-                    <h4 class="font-bold text-base text-[#1e3a8a]">{{ Auth::user()->name ?? 'Username' }}</h4>
-                    <p class="text-xs text-slate-500 break-all">{{ Auth::user()->email ?? 'example@gmail.com' }}</p>
+                <div class="px-2 mb-2">
+                    <h4 class="font-bold text-base text-slate-900 truncate">{{ Auth::user()->name ?? 'Username' }}</h4>
+                    <p class="text-xs text-slate-500 break-all truncate">{{ Auth::user()->email ?? 'example@gmail.com' }}</p>
                 </div>
                 
                 <hr class="border-slate-100 my-2">
 
+                <div class="space-y-1 mb-2">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 mb-1">Daftar Bacaan</p>
+                    
+                    <a href="#backlog" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-slate-400"></span> Backlog
+                        </span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-md font-bold">{{ $mangas->where('status', 'Backlog')->count() }}</span>
+                    </a>
+
+                    <a href="#reading" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> Reading
+                        </span>
+                        <span class="bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $mangas->where('status', 'Reading')->count() }}</span>
+                    </a>
+
+                    <a href="#completed" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span> Completed
+                        </span>
+                        <span class="bg-green-50 text-green-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $mangas->where('status', 'Completed')->count() }}</span>
+                    </a>
+                </div>
+
+                <hr class="border-slate-100 my-2">
+
                 <form action="{{ route('logout') }}" method="POST" class="w-full">
                     @csrf
-                    <button type="submit" class="w-full bg-[#851010] hover:bg-[#660c0c] text-white text-center py-2 rounded-md text-sm font-semibold transition cursor-pointer shadow-sm">
+                    <button type="submit" class="w-full bg-[#851010] hover:bg-[#660c0c] text-white text-center py-2 rounded-lg text-sm font-semibold transition cursor-pointer shadow-sm flex items-center justify-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
                         Logout
                     </button>
                 </form>
@@ -142,7 +177,7 @@
                 $filteredManga = $mangas->where('status', ucfirst($cat['slug']));
             @endphp
 
-            <div class="mb-8">
+            <div class="mb-8 scroll-mt-12" id="{{ $cat['slug'] }}">
                 
                 <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-1.5">
                     <h2 class="text-xl font-800 text-slate-800 tracking-tight">{{ $cat['label'] }}</h2>
@@ -183,18 +218,17 @@
         document.addEventListener('DOMContentLoaded', function () {
             const sliderOptions = {
                 slidesPerView: 1,
-                spaceBetween: 24, // Pas dengan gap-6 Tailwind
+                spaceBetween: 24,
                 navigation: {
                     nextEl: '.swiper-button-next',
                     prevEl: '.swiper-button-prev',
                 },
                 breakpoints: {
                     640: { slidesPerView: 2 },
-                    1024: { slidesPerView: 3 } // Memuat pas 3 kartu sejajar di monitor besar
+                    1024: { slidesPerView: 3 }
                 }
             };
 
-            // Inisialisasi slider jika elemennya tersedia di DOM
             if(document.querySelector('.mySwiper-backlog')) {
                 new Swiper('.mySwiper-backlog', sliderOptions);
             }
