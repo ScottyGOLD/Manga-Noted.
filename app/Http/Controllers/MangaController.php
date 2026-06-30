@@ -2,45 +2,48 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Manga;
 use App\Models\Author;
+use App\Models\User; 
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class MangaController extends Controller
 {
-   public function index(Request $request)
+    // INDEX: Menampilkan dashboard manga khusus milik user yang login
+    public function index(Request $request)
     {
-        // 1. Ambil query dasar model Manga beserta relasi author-nya
-        $query = Manga::with('author');
+        // Mengamankan halaman, jika tidak login langsung lempar ke form login
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
 
-        // 2. LOGIKA PENCARIAN (PENTING):
-        // Jika user mengetik sesuatu di kolom search
+        // Trik jitu: Mengambil data langsung dari model Manga berdasarkan user_id 
+        // Ini akan 100% menghilangkan garis merah di VS Code / Intelephense kamu
+        $query = Manga::where('user_id', Auth::id())->with('author');
+
+        // LOGIKA PENCARIAN
         if ($request->filled('search')) {
             $search = $request->search;
             
             $query->where(function($q) use ($search) {
-                // Cari berdasarkan judul manga yang mirip
                 $q->where('title', 'LIKE', '%' . $search . '%')
-                // ATAU cari berdasarkan nama author di tabel relasinya
                 ->orWhereHas('author', function($queryAuthor) use ($search) {
                     $queryAuthor->where('name', 'LIKE', '%' . $search . '%');
                 });
             });
         }
 
-        // 3. Ambil data hasil query (urutkan berdasarkan yang terbaru jika mau)
+        // Ambil data hasil query yang diurutkan dari yang terbaru
         $mangas = $query->latest()->get();
 
-
-        // 4. Kelompokkan berdasarkan status untuk tampilan papan Kanban kamu
+        // Kelompokkan data berdasarkan status untuk kebutuhan view kamu
         $backlog   = $mangas->where('status', 'Backlog');
         $reading   = $mangas->where('status', 'Reading');
         $completed = $mangas->where('status', 'Completed');
 
-        // 5. Lempar semua data (TERMASUK $mangas) ke halaman index
-        // TAMBAHKAN 'mangas' DI DALAM COMPACT SEPERTI DI BAWAH INI:
         return view('manga.index', compact('backlog', 'reading', 'completed', 'mangas'));
     }
 
@@ -54,10 +57,9 @@ class MangaController extends Controller
         return view('manga.create', compact('authors'));
     }
 
-    // STORE: Menyimpan data manga baru ke database
+    // STORE: Menyimpan data manga baru ke database terikat ke user yang login
     public function store(Request $request)
     {
-        // 1. Validasi data
         $request->validate([
             'title' => 'required|string|max:255',
             'volumes_owned' => 'required|integer|min:0',
@@ -66,16 +68,15 @@ class MangaController extends Controller
             'status' => 'required|in:Backlog,Reading,Completed',
         ]);
 
-        // PERBAIKAN: Masukkan target_chapter ke dalam array $data
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
             'last_read_chapter' => $request->last_read_chapter ?? 0,
-            'target_chapter'    => $request->target_chapter ?? 0, // <--- Selesai diperbaiki
+            'target_chapter'    => $request->target_chapter ?? 0,
             'status'            => $request->status,
         ];
 
-        // Logika Author
+        // Logika Pengisian Author
         if ($request->filled('new_author')) {
             $author = Author::firstOrCreate(['name' => $request->new_author]);
             $data['author_id'] = $author->id;
@@ -83,7 +84,7 @@ class MangaController extends Controller
             $data['author_id'] = $request->author_id;
         }
 
-        // LOGIKA PROSES GAMBAR YANG DI-CROP:
+        // Logika Proses Gambar dari Cropper
         if ($request->filled('cropped_image')) {
             $image_parts = explode(";base64,", $request->cropped_image);
             $image_type_aux = explode("image/", $image_parts[0]);
@@ -91,11 +92,16 @@ class MangaController extends Controller
             $image_base64 = base64_decode($image_parts[1]);
             
             $fileName = 'covers/' . uniqid() . '.' . $image_type;
-            \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, $image_base64);
+            
+            Storage::disk('public')->put($fileName, $image_base64);
             
             $data['cover_image'] = $fileName;
         }
 
+        // Trik jitu: Memasukkan ID User yang sedang aktif langsung ke dalam array data
+        // Bebas dari teks merah di editor dan data tersimpan dengan aman
+        $data['user_id'] = Auth::id();
+        
         Manga::create($data);
 
         return redirect()->route('manga.index')->with('success', 'Manga berhasil disimpan dengan cover proporsional!');
