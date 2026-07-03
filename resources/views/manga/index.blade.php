@@ -77,7 +77,7 @@
                  x-transition:leave-start="transform opacity-100 scale-100"
                  x-transition:leave-end="transform opacity-0 scale-95"
                  class="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl py-3 px-3 z-50 border border-slate-100 text-slate-800"
-                 style="display: none;">
+                 style="display: none;"> 
                 
                 <div class="px-2 mb-2">
                     <h4 class="font-bold text-base text-slate-900 truncate">{{ Auth::user()->name ?? 'Username' }}</h4>

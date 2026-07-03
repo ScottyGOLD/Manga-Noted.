@@ -10,15 +10,16 @@ class Manga extends Model
 {
     use HasFactory;
 
-   protected $fillable = [
-    'user_id',
-    'title', 
-    'author_id', 
-    'volumes_owned', 
-    'last_read_chapter', 
-    'target_chapter', 
-    'status', 
-    'cover_image'];
+    protected $fillable = [
+        'user_id',
+        'title',
+        'author_id',
+        'volumes_owned',
+        'last_read_chapter',
+        'target_chapter',
+        'status',
+        'cover_image'
+    ];
 
     // Relasi ke model Author
     public function author()
@@ -26,7 +27,7 @@ class Manga extends Model
         return $this->belongsTo(Author::class, 'author_id');
     }
 
-        public function user()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

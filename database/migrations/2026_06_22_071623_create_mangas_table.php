@@ -14,7 +14,7 @@ return new class extends Migration
     Schema::create('mangas', function (Blueprint $table) {
         $table->id(); // Ini ID Utamanya Manga (Primary Key)
         $table->string('title');
-        $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->foreignId('user_id')->constrained()->onDelete('cascade'); 
         $table->foreignId('author_id')->nullable()->constrained('authors')->onDelete('set null');
         $table->integer('volumes_owned')->default(0);
         $table->integer('last_read_chapter')->default(0);

@@ -78,31 +78,30 @@ class MangaController extends Controller
 
         // Logika Pengisian Author
         if ($request->filled('new_author')) {
-            $author = Author::firstOrCreate(['name' => $request->new_author]);
-            $data['author_id'] = $author->id;
-        } elseif ($request->filled('author_id')) {
+            $author = Author::firstOrCreate(['name' => $request->new_author]); 
+            $data['author_id'] = $author->id;  
+        } elseif ($request->filled('author_id')) { 
             $data['author_id'] = $request->author_id;
         }
 
         // Logika Proses Gambar dari Cropper
-        if ($request->filled('cropped_image')) {
-            $image_parts = explode(";base64,", $request->cropped_image);
-            $image_type_aux = explode("image/", $image_parts[0]);
-            $image_type = $image_type_aux[1];
-            $image_base64 = base64_decode($image_parts[1]);
+        if ($request->filled('cropped_image')) { 
+            $image_parts = explode(";base64,", $request->cropped_image); 
+            $image_type_aux = explode("image/", $image_parts[0]); 
+            $image_type = $image_type_aux[1]; 
+            $image_base64 = base64_decode($image_parts[1]); 
             
-            $fileName = 'covers/' . uniqid() . '.' . $image_type;
+            $fileName = 'covers/' . uniqid() . '.' . $image_type; 
             
             Storage::disk('public')->put($fileName, $image_base64);
             
-            $data['cover_image'] = $fileName;
+            $data['cover_image'] = $fileName; 
         }
 
         // Trik jitu: Memasukkan ID User yang sedang aktif langsung ke dalam array data
-        // Bebas dari teks merah di editor dan data tersimpan dengan aman
         $data['user_id'] = Auth::id();
         
-        Manga::create($data);
+        Manga::create($data); 
 
         return redirect()->route('manga.index')->with('success', 'Manga berhasil disimpan dengan cover proporsional!');
     }
@@ -125,16 +124,15 @@ class MangaController extends Controller
             'title' => 'required|max:255',
             'volumes_owned' => 'required|integer|min:0',
             'last_read_chapter' => 'required|integer|min:0',
-            'target_chapter' => 'required|integer|min:0', // <--- Selesai diperbaiki
+            'target_chapter' => 'required|integer|min:0', 
             'status' => 'required',
         ]);
 
-        // PERBAIKAN: Masukkan target_chapter ke dalam array $data sewaktu update
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
             'last_read_chapter' => $request->last_read_chapter ?? 0,
-            'target_chapter'    => $request->target_chapter ?? 0, // <--- Selesai diperbaiki
+            'target_chapter'    => $request->target_chapter ?? 0, 
             'status'            => $request->status,
         ];
 
@@ -186,13 +184,11 @@ class MangaController extends Controller
     public function incrementChapter($id)
     {
         $manga = Manga::findOrFail($id);
-        
-        // Tambah 1 chapter
         $manga->last_read_chapter += 1;
 
         // LOGIKA OTOMATIS: Jika target_chapter sudah diatur (> 0) 
         // dan bab yang dibaca sudah menyamai atau melebihi target
-        if ($manga->target_chapter > 0 && $manga->last_read_chapter >= $manga->target_chapter) {
+        if ($manga->target_chapter > 0 && $manga->last_read_chapter >= $manga->target_chapter) {  
             $manga->status = 'Completed';
         } else {
             // Jika awalnya Backlog lalu mulai dibaca, otomatis pindah ke Reading

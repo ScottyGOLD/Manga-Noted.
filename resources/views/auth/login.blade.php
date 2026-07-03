@@ -31,12 +31,14 @@
 
         <div class="w-full md:w-1/2 h-full bg-[#f8fafc] flex flex-col justify-center items-center px-8 sm:px-16 lg:px-24 relative">
             
+ 
+            <div class="w-full max-w-md">
+
             <div class="flex flex-col items-center mb-8">
                 <img src="{{ asset('img/manga-noted-logo.png') }}" alt="Manga Noted Logo" class="w-50 h-50 object-contain mb-2">
                 <h2 class="text-2xl font-serif tracking-wide text-slate-800 font-medium">Manga Noted</h2>
             </div>
-
-            <div class="w-full max-w-md">
+            
                 <h1 class="text-3xl font-bold text-black mb-6">Login</h1>
 
                 @if ($errors->any())
