@@ -89,25 +89,32 @@
                 <div class="space-y-1 mb-2">
                     <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 mb-1">Daftar Bacaan</p>
                     
+                    <a href="#wishlist" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
+                        <span class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span> Wishlist
+                        </span>
+                        <span class="bg-amber-50 text-amber-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $wishlist->count() }}</span>
+                    </a>
+
                     <a href="#backlog" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
                         <span class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-slate-400"></span> Backlog
                         </span>
-                        <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-md font-bold">{{ $mangas->where('status', 'Backlog')->count() }}</span>
+                        <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-md font-bold">{{ $backlog->count() }}</span>
                     </a>
 
                     <a href="#reading" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
                         <span class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-blue-500"></span> Reading
                         </span>
-                        <span class="bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $mangas->where('status', 'Reading')->count() }}</span>
+                        <span class="bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $reading->count() }}</span>
                     </a>
 
                     <a href="#completed" @click="open = false" class="flex items-center justify-between px-2 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition">
                         <span class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-green-500"></span> Completed
                         </span>
-                        <span class="bg-green-50 text-green-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $mangas->where('status', 'Completed')->count() }}</span>
+                        <span class="bg-green-50 text-green-600 text-xs px-2 py-0.5 rounded-md font-bold">{{ $completed->count() }}</span>
                     </a>
                 </div>
 
@@ -164,8 +171,10 @@
             </form>
         </div>
 
+        {{-- ==================== DYNAMIC CATEGORIES LOOP (Wishlist, Backlog, Reading, Completed) ==================== --}}
         @php
             $categories = [
+                ['slug' => 'wishlist', 'label' => 'Wishlist', 'badgeBg' => 'bg-amber-100 text-amber-700'],
                 ['slug' => 'backlog', 'label' => 'Backlog', 'badgeBg' => 'bg-slate-200 text-slate-700'],
                 ['slug' => 'reading', 'label' => 'Reading', 'badgeBg' => 'bg-blue-100 text-blue-700'],
                 ['slug' => 'completed', 'label' => 'Completed', 'badgeBg' => 'bg-green-100 text-green-700']
@@ -177,10 +186,10 @@
                 $filteredManga = $mangas->where('status', ucfirst($cat['slug']));
             @endphp
 
-            <div class="mb-8 scroll-mt-12" id="{{ $cat['slug'] }}">
+            <div class="mb-10 scroll-mt-12" id="{{ $cat['slug'] }}">
                 
                 <div class="flex items-center gap-2 mb-4 border-b border-slate-100 pb-1.5">
-                    <h2 class="text-xl font-800 text-slate-800 tracking-tight">{{ $cat['label'] }}</h2>
+                    <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">{{ $cat['label'] }}</h2>
                     <span class="text-xs font-bold px-2.5 py-0.5 rounded-full {{ $cat['badgeBg'] }}">
                         {{ $filteredManga->count() }}
                     </span>

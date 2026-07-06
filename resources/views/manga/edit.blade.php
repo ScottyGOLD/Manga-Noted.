@@ -90,12 +90,12 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Chapter Terakhir</label>
-                        <input type="number" name="last_read_chapter" value="{{ old('last_read_chapter', $manga->last_read_chapter) }}" min="0" required
+                        <input type="number" name="last_read_chapter" value="{{ old('last_read_chapter', $manga->last_read_chapter) }}" min="0"
                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5 text-blue-600 font-bold">Target Chapter Goal</label>
-                        <input type="number" name="target_chapter" value="{{ old('target_chapter', $manga->target_chapter ?? 0) }}" min="0" required
+                        <input type="number" name="target_chapter" value="{{ old('target_chapter', $manga->target_chapter ?? 0) }}" min="0"
                                class="w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-blue-50/20 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
                     </div>
                 </div>
@@ -104,6 +104,7 @@
                     <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Status Tracking</label>
                     <select name="status" required
                             class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
+                        <option value="Wishlist" {{ $manga->status == 'Wishlist' ? 'selected' : '' }}>Wishlist (Rencana Beli)</option>
                         <option value="Backlog" {{ $manga->status == 'Backlog' ? 'selected' : '' }}>Backlog (Belum Dibaca)</option>
                         <option value="Reading" {{ $manga->status == 'Reading' ? 'selected' : '' }}>Reading (Sedang Dibaca)</option>
                         <option value="Completed" {{ $manga->status == 'Completed' ? 'selected' : '' }}>Completed (Tamat)</option>

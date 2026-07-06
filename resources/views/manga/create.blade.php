@@ -108,6 +108,7 @@
                         <option value="Backlog">Backlog (Belum Dibaca)</option>
                         <option value="Reading">Reading (Sedang Dibaca)</option>
                         <option value="Completed">Completed (Tamat)</option>
+                        <option value="Wishlist">Wishlist (Rencana Beli)</option>
                     </select>
                 </div>
 

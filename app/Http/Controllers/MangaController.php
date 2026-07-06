@@ -20,8 +20,7 @@ class MangaController extends Controller
             return redirect()->route('login');
         }
 
-        // Trik jitu: Mengambil data langsung dari model Manga berdasarkan user_id 
-        // Ini akan 100% menghilangkan garis merah di VS Code / Intelephense kamu
+        // Mengambil data langsung dari model Manga berdasarkan user_id 
         $query = Manga::where('user_id', Auth::id())->with('author');
 
         // LOGIKA PENCARIAN
@@ -39,12 +38,14 @@ class MangaController extends Controller
         // Ambil data hasil query yang diurutkan dari yang terbaru
         $mangas = $query->latest()->get();
 
-        // Kelompokkan data berdasarkan status untuk kebutuhan view kamu
-        $backlog   = $mangas->where('status', 'Backlog');
-        $reading   = $mangas->where('status', 'Reading');
-        $completed = $mangas->where('status', 'Completed');
+                // Kelompokkan data berdasarkan status untuk kebutuhan view kamu
+                $wishlist  = $mangas->where('status', 'Wishlist'); // <-- TAMBAHKAN BARIS INI
+                $backlog   = $mangas->where('status', 'Backlog');
+                $reading   = $mangas->where('status', 'Reading');
+                $completed = $mangas->where('status', 'Completed');
 
-        return view('manga.index', compact('backlog', 'reading', 'completed', 'mangas'));
+                // Kirim variabel 'wishlist' ke view manga.index
+                return view('manga.index', compact('wishlist', 'backlog', 'reading', 'completed', 'mangas'));
     }
 
     // CREATE: Menampilkan halaman form tambah
@@ -57,22 +58,22 @@ class MangaController extends Controller
         return view('manga.create', compact('authors'));
     }
 
-    // STORE: Menyimpan data manga baru ke database terikat ke user yang login
+// STORE: Menyimpan data manga baru ke database terikat ke user yang login
     public function store(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
             'volumes_owned' => 'required|integer|min:0',
-            'last_read_chapter' => 'required|integer|min:0',
-            'target_chapter' => 'required|integer|min:0', 
-            'status' => 'required|in:Backlog,Reading,Completed',
+            'last_read_chapter' => 'nullable|integer|min:0', // Diubah jadi nullable
+            'target_chapter' => 'nullable|integer|min:0',    // Diubah jadi nullable
+            'status' => 'required|in:Backlog,Reading,Completed,Wishlist',
         ]);
 
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
-            'last_read_chapter' => $request->last_read_chapter ?? 0,
-            'target_chapter'    => $request->target_chapter ?? 0,
+            'last_read_chapter' => $request->last_read_chapter ?? 0, // Jika kosong otomatis 0
+            'target_chapter'    => $request->target_chapter ?? 0,    // Jika kosong otomatis 0
             'status'            => $request->status,
         ];
 
@@ -113,19 +114,18 @@ class MangaController extends Controller
         $authors = Author::orderBy('name', 'asc')->get();
 
         // 2. Kirim data $manga DAN $authors sekaligus ke halaman edit
-        return view('manga.edit', compact('manga', 'authors'));
+        return view('manga.edit', compact('manga', 'authors')); 
     }
 
-        // UPDATE: Memperbarui data manga
-        public function update(Request $request, Manga $manga)
+// UPDATE: Memperbarui data manga
+    public function update(Request $request, Manga $manga)
     {
-        // Tambahkan target_chapter di validasi update agar aman
         $request->validate([
             'title' => 'required|max:255',
             'volumes_owned' => 'required|integer|min:0',
-            'last_read_chapter' => 'required|integer|min:0',
-            'target_chapter' => 'required|integer|min:0', 
-            'status' => 'required',
+            'last_read_chapter' => 'nullable|integer|min:0', // Diubah jadi nullable
+            'target_chapter' => 'nullable|integer|min:0',    // Diubah jadi nullable
+            'status' => 'required|in:Backlog,Reading,Completed,Wishlist', // Diperketat kriterianya
         ]);
 
         $data = [
@@ -186,7 +186,7 @@ class MangaController extends Controller
         $manga = Manga::findOrFail($id);
         $manga->last_read_chapter += 1;
 
-        // LOGIKA OTOMATIS: Jika target_chapter sudah diatur (> 0) 
+        // Jika target_chapter sudah diatur (> 0) 
         // dan bab yang dibaca sudah menyamai atau melebihi target
         if ($manga->target_chapter > 0 && $manga->last_read_chapter >= $manga->target_chapter) {  
             $manga->status = 'Completed';
