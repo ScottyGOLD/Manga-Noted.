@@ -39,12 +39,12 @@ class MangaController extends Controller
         $mangas = $query->latest()->get();
 
                 // Kelompokkan data berdasarkan status untuk kebutuhan view kamu
-                $wishlist  = $mangas->where('status', 'Wishlist'); // <-- TAMBAHKAN BARIS INI
+                $wishlist  = $mangas->where('status', 'Wishlist'); 
                 $backlog   = $mangas->where('status', 'Backlog');
                 $reading   = $mangas->where('status', 'Reading');
                 $completed = $mangas->where('status', 'Completed');
 
-                // Kirim variabel 'wishlist' ke view manga.index
+                // Kirim semua data ke view
                 return view('manga.index', compact('wishlist', 'backlog', 'reading', 'completed', 'mangas'));
     }
 
@@ -61,14 +61,16 @@ class MangaController extends Controller
 // STORE: Menyimpan data manga baru ke database terikat ke user yang login
     public function store(Request $request)
     {
+        // Validasi input dari form
         $request->validate([
             'title' => 'required|string|max:255',
             'volumes_owned' => 'required|integer|min:0',
-            'last_read_chapter' => 'nullable|integer|min:0', // Diubah jadi nullable
-            'target_chapter' => 'nullable|integer|min:0',    // Diubah jadi nullable
+            'last_read_chapter' => 'nullable|integer|min:0', 
+            'target_chapter' => 'nullable|integer|min:0',   
             'status' => 'required|in:Backlog,Reading,Completed,Wishlist',
         ]);
 
+        // Menyusun data untuk disimpan ke database
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
@@ -120,14 +122,16 @@ class MangaController extends Controller
 // UPDATE: Memperbarui data manga
     public function update(Request $request, Manga $manga)
     {
+        // Validasi input dari form
         $request->validate([
             'title' => 'required|max:255',
             'volumes_owned' => 'required|integer|min:0',
-            'last_read_chapter' => 'nullable|integer|min:0', // Diubah jadi nullable
-            'target_chapter' => 'nullable|integer|min:0',    // Diubah jadi nullable
-            'status' => 'required|in:Backlog,Reading,Completed,Wishlist', // Diperketat kriterianya
+            'last_read_chapter' => 'nullable|integer|min:0', 
+            'target_chapter' => 'nullable|integer|min:0',   
+            'status' => 'required|in:Backlog,Reading,Completed,Wishlist',
         ]);
 
+        // Menyusun data untuk diperbarui ke database
         $data = [
             'title'             => $request->title,
             'volumes_owned'     => $request->volumes_owned ?? 0,
@@ -166,16 +170,19 @@ class MangaController extends Controller
         // Eksekusi update ke database
         $manga->update($data);
 
+        // Redirect ke halaman index dengan pesan sukses
         return redirect()->route('manga.index')->with('success', 'Manga berhasil diperbarui dengan cover proporsional!');
     }
 
     // DELETE: Menghapus data manga
     public function destroy(Manga $manga)
     {
+        // Hapus file cover image dari storage jika ada
         if ($manga->cover_image) {
             Storage::disk('public')->delete($manga->cover_image);
         }
         
+        // Hapus data manga dari database
         $manga->delete();
         return redirect()->route('manga.index')->with('success', 'Manga berhasil dihapus!');
     }
@@ -183,7 +190,10 @@ class MangaController extends Controller
     // PATCH: Menambahkan 1 ke last_read_chapter
     public function incrementChapter($id)
     {
+        // Temukan manga berdasarkan ID, jika tidak ditemukan akan menampilkan 404
         $manga = Manga::findOrFail($id);
+
+        // Tambahkan 1 ke last_read_chapter
         $manga->last_read_chapter += 1;
 
         // Jika target_chapter sudah diatur (> 0) 
@@ -197,6 +207,7 @@ class MangaController extends Controller
             }
         }
 
+        // Simpan perubahan ke database
         $manga->save();
 
         return back()->with('success', 'Progres bacaan berhasil ditingkatkan!');

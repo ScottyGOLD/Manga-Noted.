@@ -4,24 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MangaController;
 use Illuminate\Support\Facades\Route;
 
-// Halaman utama (Daftar Manga)
-Route::get('/', [MangaController::class, 'index'])->name('manga.index');
-
-// Halaman & Proses Tambah Data
-Route::get('/manga/create', [MangaController::class, 'create'])->name('manga.create');
-Route::post('/manga', [MangaController::class, 'store'])->name('manga.store');
-
-// Halaman & Proses Edit Data
-Route::get('/manga/{manga}/edit', [MangaController::class, 'edit'])->name('manga.edit');
-Route::put('/manga/{manga}', [MangaController::class, 'update'])->name('manga.update');
-
-// Proses Hapus Data
-Route::delete('/manga/{manga}', [MangaController::class, 'destroy'])->name('manga.destroy');
-
-// Proses Increment Chapter
-Route::patch('/manga/{manga}/increment-chapter', [MangaController::class, 'incrementChapter'])->name('manga.increment');
-
-// Route untuk halaman login dan register hanya bisa diakses oleh guest (belum login)
+// =========================================================================
+// 1. ROUTE KHUSUS TAMU (Belum Login)
+// =========================================================================
 Route::middleware('guest')->group(function () {
     // Login
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -32,11 +17,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Route untuk halaman yang hanya bisa diakses oleh user yang sudah login
+// =========================================================================
+// 2. ROUTE KHUSUS USER TERDAFTAR (Sudah Login)
+// =========================================================================
 Route::middleware('auth')->group(function () {
-    
-    // Halaman utama Tracker kamu masukkan ke dalam sini
+    // Halaman Utama / Dashboard Tracker
     Route::get('/', [MangaController::class, 'index'])->name('manga.index');
+    
+    // Rute Custom untuk Fitur Tambah Chapter (Taruh di atas resource)
+    Route::patch('/manga/{manga}/increment-chapter', [MangaController::class, 'incrementChapter'])->name('manga.increment');
+
+    // Rute CRUD Otomatis (Create, Store, Edit, Update, Destroy, Show)
     Route::resource('manga', MangaController::class)->except(['index']);
 
     // Tombol Logout
