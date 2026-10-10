@@ -24,6 +24,10 @@ Route::middleware('auth')->group(function () {
     // Halaman Utama / Dashboard Tracker
     Route::get('/', [MangaController::class, 'index'])->name('manga.index');
     
+    // Rute Pencarian Library Eksternal (AniList / Manga Database)
+    Route::get('/manga/search-library', [MangaController::class, 'searchLibrary'])->name('manga.search.library');
+    Route::get('/manga/proxy-cover', [MangaController::class, 'proxyCover'])->name('manga.proxy.cover');
+
     // Rute Custom untuk Fitur Tambah Chapter (Taruh di atas resource)
     Route::patch('/manga/{manga}/increment-chapter', [MangaController::class, 'incrementChapter'])->name('manga.increment');
 

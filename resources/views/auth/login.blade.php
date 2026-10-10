@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +11,6 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
 
-        /* Menyembunyikan ikon mata bawaan browser (Edge, Chrome, Safari) agar tidak double */
         input::-ms-reveal,
         input::-ms-clear {
             display: none !important;
@@ -21,25 +20,24 @@
         }
     </style>
 </head>
-<body class="bg-[#f8fafc] h-screen overflow-hidden">
+<body class="bg-[#f8fafc] min-h-screen overflow-y-auto">
 
-    <div class="flex h-full w-full">
-        <div class="hidden md:block w-1/2 h-full bg-slate-900 relative">
+    <div class="flex min-h-screen w-full">
+        <div class="hidden md:block w-1/2 min-h-screen bg-slate-900 relative">
             <img src="{{ asset('img/manga-shelf-bg.jpg') }}" alt="Manga Shelf" class="w-full h-full object-cover opacity-90">
-            <div class="absolute inset-0 bg-black/10"></div>
+            <div class="absolute inset-0 bg-black/20"></div>
         </div>
 
-        <div class="w-full md:w-1/2 h-full bg-[#f8fafc] flex flex-col justify-center items-center px-8 sm:px-16 lg:px-24 relative">
+        <div class="w-full md:w-1/2 min-h-screen bg-[#f8fafc] flex flex-col justify-center items-center px-6 sm:px-12 lg:px-20 py-10">
             
- 
             <div class="w-full max-w-md">
 
-            <div class="flex flex-col items-center mb-8">
-                <img src="{{ asset('img/manga-noted-logo.png') }}" alt="Manga Noted Logo" class="w-50 h-50 object-contain mb-2">
-                <h2 class="text-2xl font-serif tracking-wide text-slate-800 font-medium">Manga Noted</h2>
-            </div>
-            
-                <h1 class="text-3xl font-bold text-black mb-6">Login</h1>
+                <div class="flex flex-col items-center mb-8">
+                    <img src="{{ asset('img/manga-noted-logo.png') }}" alt="Manga Noted Logo" class="w-32 h-32 sm:w-40 sm:h-40 object-contain mb-2">
+                    <h2 class="text-xl sm:text-2xl font-serif tracking-wide text-slate-800 font-medium">Manga Noted</h2>
+                </div>
+                
+                <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-6">Login</h1>
 
                 @if ($errors->any())
                     <div class="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm shadow-xs flex items-start gap-3">
@@ -62,32 +60,35 @@
                     
                     <div>
                         <input type="email" name="email" value="{{ old('email') }}" required
-                               class="w-full px-4 py-3 bg-[#d9d9d9] border-2 rounded-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all
-                               {{ $errors->has('email') ? 'border-red-400 focus:ring-red-500' : 'border-transparent' }}" 
+                               class="w-full px-4 py-3 bg-[#e2e8f0]/80 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b4c7e]/20 focus:border-[#2b4c7e] text-sm transition-all
+                               {{ $errors->has('email') ? 'border-red-400 focus:ring-red-500' : '' }}" 
                                placeholder="Email">
                     </div>
 
                     <div class="relative flex items-center">
                         <input type="password" id="password" name="password" required
-                               class="w-full px-4 py-3 bg-[#d9d9d9] border-2 rounded-sm text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all pr-12
-                               {{ $errors->has('email') || $errors->has('password') ? 'border-red-400 focus:ring-red-500' : 'border-transparent' }}" 
+                               class="w-full px-4 py-3 bg-[#e2e8f0]/80 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-[#2b4c7e]/20 focus:border-[#2b4c7e] text-sm transition-all pr-12
+                               {{ $errors->has('email') || $errors->has('password') ? 'border-red-400 focus:ring-red-500' : '' }}" 
                                placeholder="Password">
                         
-                        <button type="button" onclick="togglePassword('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer select-none z-10">
+                        <button type="button" onclick="togglePassword('password', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 cursor-pointer select-none z-10 p-1">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path class="eye-path" stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
                             </svg>
                         </button>
                     </div>
 
-                    <button type="submit" class="w-full py-3 bg-[#4475b5] hover:bg-[#366199] text-white font-medium text-sm rounded-sm transition shadow-sm mt-2 cursor-pointer">
+                    <button type="submit" class="w-full py-3 bg-[#2b4c7e] hover:bg-[#1f375b] text-white font-semibold text-sm rounded-xl transition shadow-xs hover:shadow mt-2 cursor-pointer">
                         Login
                     </button>
                 </form>
 
-                <div class="text-center mt-12">
-                    <a href="{{ route('register') }}" class="text-sm text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1">
-                        Create Account <span class="text-base">→</span>
+                <div class="text-center mt-10">
+                    <a href="{{ route('register') }}" class="text-sm text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1.5 font-medium">
+                        <span>Create Account</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                     </a>
                 </div>
             </div>
@@ -102,11 +103,9 @@
             
             if (input.type === 'password') {
                 input.type = 'text';
-                // Mengubah ke ikon mata terbuka
                 svgPath.setAttribute('d', 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z');
             } else {
                 input.type = 'password';
-                // Mengembalikan ke ikon mata dicoret
                 svgPath.setAttribute('d', 'M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18');
             }
         }
